@@ -34,7 +34,7 @@ def fetch_events():
 
 def filter_today(events):
 
-    today = utc.localize(datetime.now()).date()
+    today = datetime.now().date()
 
     return [
         e for e in events
@@ -44,7 +44,7 @@ def filter_today(events):
 
 def filter_week(events):
 
-    now = utc.localize(datetime.now())
+    now = datetime.now()
     end = now + timedelta(days=7)
 
     return [
