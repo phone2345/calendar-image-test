@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from dateutil import tz
 import os
 
-ICS_URL = "PASTE_YOUR_ICS_URL_HERE"
+ICS_URL = "https://calendar.google.com/calendar/u/0?cid=YjViZDA0NWFiNzY4Y2FjYzdlNjk3NjAxNjRjMmIzOTI5OWRmZmMyMTQ2NDZkNWRiM2U0NDdkZmViN2ZkYmM4YUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
 
 WIDTH = 1000
 HEIGHT = 600
