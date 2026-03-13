@@ -2,3 +2,4 @@ icalendar
 Pillow
 requests
 python-dateutil
+pytz
