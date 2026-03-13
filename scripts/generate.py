@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from dateutil import tz
 import os
-
+import pytz
+utc=pytz.UTC
 ICS_URL = "https://calendar.google.com/calendar/ical/b5bd045ab768cacc7e69760164c2b39299dffc214646d5db3e447dfeb7fdbc8a%40group.calendar.google.com/public/basic.ics"
 
 WIDTH = 1000
@@ -33,22 +34,22 @@ def fetch_events():
 
 def filter_today(events):
 
-    today = datetime.now().date()
+    today = utc.localize(datetime.now().date())
 
     return [
         e for e in events
-        if e[0].date() == today
+        if utc.localize(e[0].date()) == today
     ]
 
 
 def filter_week(events):
 
-    now = datetime.now()
+    now = utc.localize(datetime.now())
     end = now + timedelta(days=7)
 
     return [
         e for e in events
-        if now <= e[0] <= end
+        if now <= utc.localize(e[0]) <= end
     ]
 
 
