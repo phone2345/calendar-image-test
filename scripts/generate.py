@@ -38,7 +38,7 @@ def filter_today(events):
 
     return [
         e for e in events
-        if utc.localize(e[0]).date() == today
+        if e[0].date() == today
     ]
 
 
@@ -49,7 +49,7 @@ def filter_week(events):
 
     return [
         e for e in events
-        if now <= utc.localize(e[0]) <= end
+        if now <= e[0] <= end
     ]
 
 
