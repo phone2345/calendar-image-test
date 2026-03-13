@@ -34,11 +34,11 @@ def fetch_events():
 
 def filter_today(events):
 
-    today = utc.localize(datetime.now().date())
+    today = utc.localize(datetime.now()).date()
 
     return [
         e for e in events
-        if utc.localize(e[0].date()) == today
+        if utc.localize(e[0]).date() == today
     ]
 
 
