@@ -1,4 +1,0 @@
-icalendar
-Pillow
-requests
-python-dateutil
