@@ -85,6 +85,9 @@ def parse_events(cal):
 
             occ = rule.between(now, limit, inc=True)
 
+            print("Recurring rule:", rule_str)
+            print("Occurrences:", len(occ))
+
             for o in occ:
 
                 o = o.astimezone(TAIWAN_TZ)
