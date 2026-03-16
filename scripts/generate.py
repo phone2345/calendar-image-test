@@ -2,6 +2,7 @@ import os
 import requests
 
 from icalendar import Calendar
+from dateutil.rrule import rrulestr
 from datetime import datetime, timedelta, timezone, date
 from PIL import Image, ImageDraw, ImageFont
 
