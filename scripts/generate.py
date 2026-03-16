@@ -8,17 +8,16 @@ from PIL import Image, ImageDraw, ImageFont
 
 ICS_URL = "https://calendar.google.com/calendar/ical/f5682t1g68e42n1ij023o8dk2o%40group.calendar.google.com/public/basic.ics"
 FONT_PATH = "fonts/NotoSansTC-VariableFont_wght.ttf"
-WIDTH = 1000
-HEIGHT = 600
-
-TAIWAN_TZ = timezone(timedelta(hours=8))
-
-
-TAIWAN_TZ = timezone(timedelta(hours=8))
 
 WIDTH = 1200
 HEIGHT = 630
 
+BG = "#f5f6fa"
+CARD = "#ffffff"
+TEXT = "#222222"
+SUB = "#666666"
+
+TAIWAN_TZ = timezone(timedelta(hours=8))
 
 def fetch_calendar():
 
@@ -109,8 +108,64 @@ def filter_range(events, start, end):
         if start <= e[0] <= end
     ]
 
-
 def render_card(events, title, path):
+
+    img = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(img)
+
+    title_font = ImageFont.truetype(FONT_PATH, 64)
+    time_font = ImageFont.truetype(FONT_PATH, 32)
+    event_font = ImageFont.truetype(FONT_PATH, 36)
+
+    # title
+    draw.text((80, 60), title, fill=TEXT, font=title_font)
+
+    # card
+    card_x = 80
+    card_y = 180
+    card_w = WIDTH - 160
+    card_h = 380
+
+    draw.rounded_rectangle(
+        [card_x, card_y, card_x + card_w, card_y + card_h],
+        radius=20,
+        fill=CARD
+    )
+
+    y = card_y + 40
+
+    if not events:
+
+        draw.text(
+            (card_x + 40, y),
+            "No events",
+            fill=SUB,
+            font=event_font
+        )
+
+    for start, summary in events[:10]:
+
+        time_str = start.strftime("%m-%d %H:%M")
+
+        draw.text(
+            (card_x + 40, y),
+            time_str,
+            fill=SUB,
+            font=time_font
+        )
+
+        draw.text(
+            (card_x + 260, y),
+            summary,
+            fill=TEXT,
+            font=event_font
+        )
+
+        y += 50
+
+    img.save(f"output/{path}")
+    
+def render_card_old(events, title, path):
 
     img = Image.new("RGB", (WIDTH, HEIGHT), "#f5f6fa")
 
