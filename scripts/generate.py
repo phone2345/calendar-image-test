@@ -14,7 +14,12 @@ HEIGHT = 600
 TAIWAN_TZ = timezone(timedelta(hours=8))
 
 
-# 下載 ICS
+TAIWAN_TZ = timezone(timedelta(hours=8))
+
+WIDTH = 1200
+HEIGHT = 630
+
+
 def fetch_calendar():
 
     res = requests.get(ICS_URL)
@@ -23,10 +28,12 @@ def fetch_calendar():
     return Calendar.from_ical(res.text)
 
 
-# 解析 events
 def parse_events(cal):
 
     events = []
+
+    now = datetime.now(TAIWAN_TZ)
+    limit = now + timedelta(days=60)
 
     for component in cal.walk():
 
@@ -36,7 +43,6 @@ def parse_events(cal):
         start = component.get("dtstart").dt
         summary = str(component.get("summary"))
 
-        # 處理全天事件
         if isinstance(start, date) and not isinstance(start, datetime):
 
             start = datetime.combine(
@@ -45,12 +51,49 @@ def parse_events(cal):
                 tzinfo=timezone.utc
             )
 
-        if isinstance(start, datetime):
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=timezone.utc)
 
-            if start.tzinfo is None:
-                start = start.replace(tzinfo=timezone.utc)
+        start = start.astimezone(TAIWAN_TZ)
 
-            start = start.astimezone(TAIWAN_TZ)
+        exdates = set()
+
+        if component.get("exdate"):
+
+            for ex in component.get("exdate").dts:
+
+                exdt = ex.dt
+
+                if isinstance(exdt, date) and not isinstance(exdt, datetime):
+
+                    exdt = datetime.combine(
+                        exdt,
+                        datetime.min.time(),
+                        tzinfo=timezone.utc
+                    )
+
+                if exdt.tzinfo is None:
+                    exdt = exdt.replace(tzinfo=timezone.utc)
+
+                exdates.add(exdt.astimezone(TAIWAN_TZ))
+
+        if component.get("rrule"):
+
+            rule_str = component["rrule"].to_ical().decode()
+
+            rule = rrulestr(rule_str, dtstart=start)
+
+            occ = rule.between(now, limit, inc=True)
+
+            for o in occ:
+
+                o = o.astimezone(TAIWAN_TZ)
+
+                if o not in exdates:
+
+                    events.append((o, summary))
+
+        else:
 
             events.append((start, summary))
 
@@ -59,64 +102,48 @@ def parse_events(cal):
     return events
 
 
-# 今日事件
-def filter_today(events):
-
-    today = datetime.now(TAIWAN_TZ).date()
+def filter_range(events, start, end):
 
     return [
         e for e in events
-        if e[0].date() == today
+        if start <= e[0] <= end
     ]
 
 
-# 本週事件
-def filter_week(events):
+def render_card(events, title, path):
 
-    now = datetime.now(TAIWAN_TZ)
-    end = now + timedelta(days=7)
-
-    return [
-        e for e in events
-        if now <= e[0] <= end
-    ]
-
-
-# 生成圖片
-def render_image(events, title, path):
-
-    img = Image.new("RGB", (WIDTH, HEIGHT), "white")
+    img = Image.new("RGB", (WIDTH, HEIGHT), "#f5f6fa")
 
     draw = ImageDraw.Draw(img)
 
     try:
-        font_title = ImageFont.truetype("DejaVuSans.ttf", 40)
-        font_text = ImageFont.truetype("DejaVuSans.ttf", 28)
+        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 64)
+        text_font = ImageFont.truetype("DejaVuSans.ttf", 34)
     except:
-        font_title = None
-        font_text = None
+        title_font = None
+        text_font = None
 
-    draw.text((50, 20), title, fill="black", font=font_title)
+    draw.text((80, 60), title, fill="#222", font=title_font)
 
-    y = 100
+    y = 200
 
     if not events:
 
-        draw.text((50, y), "No events", fill="gray", font=font_text)
+        draw.text((80, y), "No events", fill="#888", font=text_font)
 
     for start, summary in events[:10]:
 
         time_str = start.strftime("%m-%d %H:%M")
 
-        text = f"{time_str}  {summary}"
+        text = f"{time_str}   {summary}"
 
-        draw.text((50, y), text, fill="black", font=font_text)
+        draw.text((80, y), text, fill="#333", font=text_font)
 
-        y += 45
+        y += 60
 
     os.makedirs("output", exist_ok=True)
 
-    img.save(path)
+    img.save(f"output/{path}")
 
 
 def main():
@@ -125,12 +152,33 @@ def main():
 
     events = parse_events(cal)
 
-    today_events = filter_today(events)
-    week_events = filter_week(events)
+    now = datetime.now(TAIWAN_TZ)
 
-    render_image(today_events, "Today's Schedule", "output/today.png")
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
 
-    render_image(week_events, "This Week", "output/week.png")
+    tomorrow_start = today_end
+    tomorrow_end = tomorrow_start + timedelta(days=1)
+
+    week_end = now + timedelta(days=7)
+
+    month_end = now + timedelta(days=30)
+
+    today = filter_range(events, today_start, today_end)
+
+    tomorrow = filter_range(events, tomorrow_start, tomorrow_end)
+
+    week = filter_range(events, now, week_end)
+
+    month = filter_range(events, now, month_end)
+
+    render_card(today, "Today", "today.png")
+
+    render_card(tomorrow, "Tomorrow", "tomorrow.png")
+
+    render_card(week, "This Week", "week.png")
+
+    render_card(month, "This Month", "month.png")
 
 
 if __name__ == "__main__":
