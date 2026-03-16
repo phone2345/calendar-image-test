@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone, date
 from PIL import Image, ImageDraw, ImageFont
 
 ICS_URL = "https://calendar.google.com/calendar/ical/b5bd045ab768cacc7e69760164c2b39299dffc214646d5db3e447dfeb7fdbc8a%40group.calendar.google.com/public/basic.ics"
-
+FONT_PATH = "fonts/NotoSansTC-VariableFont_wght.ttf"
 WIDTH = 1000
 HEIGHT = 600
 
@@ -85,9 +85,6 @@ def parse_events(cal):
 
             occ = rule.between(now, limit, inc=True)
 
-            print("Recurring rule:", rule_str)
-            print("Occurrences:", len(occ))
-
             for o in occ:
 
                 o = o.astimezone(TAIWAN_TZ)
@@ -120,8 +117,8 @@ def render_card(events, title, path):
     draw = ImageDraw.Draw(img)
 
     try:
-        title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 64)
-        text_font = ImageFont.truetype("DejaVuSans.ttf", 34)
+        title_font = ImageFont.truetype(FONT_PATH, 64)
+        text_font = ImageFont.truetype(FONT_PATH, 34)
     except:
         title_font = None
         text_font = None
@@ -150,7 +147,6 @@ def render_card(events, title, path):
 
 
 def main():
-    print("Run...")
     
     cal = fetch_calendar()
 
