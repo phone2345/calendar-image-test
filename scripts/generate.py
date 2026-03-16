@@ -2,9 +2,9 @@ import os
 import requests
 
 from icalendar import Calendar
+from dateutil.rrule import rrulestr
 from datetime import datetime, timedelta, timezone, date
 from PIL import Image, ImageDraw, ImageFont
-
 
 ICS_URL = "https://calendar.google.com/calendar/ical/b5bd045ab768cacc7e69760164c2b39299dffc214646d5db3e447dfeb7fdbc8a%40group.calendar.google.com/public/basic.ics"
 
