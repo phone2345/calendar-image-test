@@ -2,7 +2,6 @@ import os
 import requests
 
 from icalendar import Calendar
-from dateutil.rrule import rrulestr
 from datetime import datetime, timedelta, timezone, date
 from PIL import Image, ImageDraw, ImageFont
 
@@ -150,7 +149,8 @@ def render_card(events, title, path):
 
 
 def main():
-
+    print("Run...")
+    
     cal = fetch_calendar()
 
     events = parse_events(cal)
