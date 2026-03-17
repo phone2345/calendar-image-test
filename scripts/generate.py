@@ -41,7 +41,15 @@ def parse_events(cal):
             continue
 
         start = component.get("dtstart").dt
+        end = component.get("dtend").dt
+        if end:
+            duration = end.dt - start
+            duration = str(duration)
+        else:
+            duration = ""
+            
         summary = str(component.get("summary"))
+        location = str(component.get("location", ""))
 
         if isinstance(start, date) and not isinstance(start, datetime):
 
@@ -91,11 +99,11 @@ def parse_events(cal):
 
                 if o not in exdates:
 
-                    events.append((o, summary))
+                    events.append((o, summary, duration, location))
 
         else:
 
-            events.append((start, summary))
+            events.append((start, summary, duration, location))
 
     events.sort()
 
