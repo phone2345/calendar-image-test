@@ -114,55 +114,116 @@ def render_card(events, title, path):
     img = Image.new("RGB", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(img)
 
-    title_font = ImageFont.truetype(FONT_PATH, 64)
-    time_font = ImageFont.truetype(FONT_PATH, 32)
-    event_font = ImageFont.truetype(FONT_PATH, 36)
+    BLUE = "#2F6FDB"
+    WHITE = "#FFFFFF"
+    BLACK = "#222222"
+    GRID = "#D0D0D0"    
+
+    title_font = ImageFont.truetype(FONT_PATH, 52)
+    header_font = ImageFont.truetype(FONT_PATH, 30)
+    text_font = ImageFont.truetype(FONT_PATH, 28)
+    small_font = ImageFont.truetype(FONT_PATH, 24)
 
     # title
-    draw.text((80, 60), title, fill=TEXT, font=title_font)
+    draw.text((80, 40), title, fill=BLACK, font=title_font)
 
-    # card
-    card_x = 80
-    card_y = 180
-    card_w = WIDTH - 160
-    card_h = 380
+    table_x = 80
+    table_y = 140
 
-    draw.rounded_rectangle(
-        [card_x, card_y, card_x + card_w, card_y + card_h],
-        radius=20,
-        fill=CARD
+    col1 = 220
+    col2 = WIDTH - 160 - col1
+
+    row_h = 70
+
+    rows = min(len(events), 8) + 1
+
+    table_w = col1 + col2
+    table_h = row_h * rows
+
+    # header row
+    draw.rectangle(
+        [table_x, table_y, table_x + table_w, table_y + row_h],
+        fill=BLUE
     )
 
-    y = card_y + 40
+    # vertical line
+    draw.line(
+        [table_x + col1, table_y, table_x + col1, table_y + table_h],
+        fill=GRID,
+        width=2
+    )
 
-    if not events:
+    # header text
+    draw.text(
+        (table_x + 20, table_y + 18),
+        "開始時間",
+        fill=WHITE,
+        font=header_font
+    )
 
-        draw.text(
-            (card_x + 40, y),
-            "No events",
-            fill=SUB,
-            font=event_font
+    draw.text(
+        (table_x + col1 + 20, table_y + 18),
+        "活動內容",
+        fill=WHITE,
+        font=header_font
+    )
+
+    for i, (start, summary, duration, location) in enumerate(events[:8]):
+
+        y = table_y + (i + 1) * row_h
+
+        # 左側時間 cell
+        draw.rectangle(
+            [table_x, y, table_x + col1, y + row_h],
+            fill=BLUE
         )
 
-    for start, summary in events[:10]:
+        # 右側內容 cell
+        draw.rectangle(
+            [table_x + col1, y, table_x + table_w, y + row_h],
+            fill=WHITE
+        )
 
-        time_str = start.strftime("%m-%d %H:%M")
+        # grid line
+        draw.line(
+            [table_x, y, table_x + table_w, y],
+            fill=GRID
+        )
+
+        time_str = start.strftime("%H:%M")
 
         draw.text(
-            (card_x + 40, y),
+            (table_x + 20, y + 20),
             time_str,
-            fill=SUB,
-            font=time_font
+            fill=WHITE,
+            font=text_font
         )
 
+        # event title
         draw.text(
-            (card_x + 260, y),
+            (table_x + col1 + 20, y + 8),
             summary,
-            fill=TEXT,
-            font=event_font
+            fill=BLACK,
+            font=text_font
         )
 
-        y += 50
+        # duration
+        draw.text(
+            (table_x + col1 + 20, y + 34),
+            f"時長：{duration}",
+            fill=BLACK,
+            font=small_font
+        )
+
+        # location
+        draw.text(
+            (table_x + col1 + 180, y + 34),
+            f"地點：{location or ''}",
+            fill=BLACK,
+            font=small_font
+        )
+
+    os.makedirs("output", exist_ok=True)
 
     img.save(f"output/{path}")
     
