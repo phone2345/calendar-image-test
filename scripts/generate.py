@@ -41,7 +41,7 @@ def parse_events(cal):
             continue
 
         start = component.get("dtstart").dt
-        end = component.get("dtend").dt
+        end = component.get("dtend")
         if end:
             duration = end.dt - start
             duration = str(duration)
